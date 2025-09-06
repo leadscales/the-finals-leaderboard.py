@@ -1,0 +1,26 @@
+[project]
+name = "the-finals-leaderboard.py"
+version = "0.1.0"
+description = "A sync/async Python wrapper for the-finals-leaderboard.com, with some more user-friendly abstractions."
+authors = [{ name = "Leadscales" }]
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "httpx>=0.28.0",
+    "pydantic>=2.11"
+]
+
+[build-system]
+requires = ["setuptools>=80.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"

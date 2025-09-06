@@ -1,0 +1,122 @@
+from __future__ import annotations
+from typing import Literal
+
+import httpx
+import warnings
+from pydantic import ValidationError
+from the_finals_leaderboard.api import *
+from the_finals_leaderboard.models import *
+
+
+class Client():
+    def __init__(self, url: str = "https://api.the-finals-leaderboard.com", timeout: float = 10.0):
+        self._sync_client = httpx.Client(
+            base_url=url,
+            timeout=timeout
+        )
+        self._async_client = httpx.AsyncClient(
+            base_url=url,
+            timeout=timeout
+        )
+
+    def get_leaderboard_sync(
+        self,
+        leaderboard: Leaderboard,
+        name: str | None = None,
+        club_tag: str | None = None,
+        exact_club_tag: bool | None = None,
+        platform: Platform = Platform.CROSSPLAY
+    ):
+        """
+        Get a leaderboard synchronously.
+
+        Args:
+            leaderboard (Leaderboard): Which leaderboard to get data from.
+            name (str | None, optional): Name filter, case-insensitive. Defaults to None.
+            club_tag (str | None, optional): Club tag filter. Defaults to None.
+            exact_club_tag (bool | None, optional): Whether or not to filter by the EXACT club tag, if club_tag is not None. Defaults to None.
+            platform (Platform, optional): Required for OB, S1, and S2. Defaults to Platform.CROSSPLAY.
+        """
+        leaderboard = Leaderboard(leaderboard)
+        platform = Platform(platform)
+
+        path = f"/v1/leaderboard/{leaderboard.value}"
+
+        match leaderboard:
+            case Leaderboard.CB1 | Leaderboard.CB2:
+                pass
+            case Leaderboard.OB | Leaderboard.S1 | Leaderboard.S2:
+                path += f"/{platform.value}"
+            case _:
+                if platform != Platform.CROSSPLAY:
+                    warnings.warn(f"Note that all leaderboards after Season 2 only support crossplay. {platform.value} ignored, using crossplay.")
+                path += f"/crossplay"
+
+        params = {
+            "name": name,
+            "clubTag": club_tag,
+            "exactClubTag": exact_club_tag
+        }
+        params = {key: value for key, value in params.items() if value}
+
+        response = self._sync_client.get(
+            path,
+            params=params
+        )
+
+        response.raise_for_status()
+
+        try:
+            return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate_json(response.content)
+        except ValidationError as e:
+            raise ValueError("Could not convert leaderboard data to object") from e
+
+    async def get_leaderboard_async(
+        self,
+        leaderboard: Leaderboard,
+        name: str | None = None,
+        club_tag: str | None = None,
+        exact_club_tag: bool | None = None,
+        platform: Platform = Platform.CROSSPLAY
+    ):
+        """
+        Get a leaderboard asynchronously.
+
+        Args:
+            leaderboard (Leaderboard): Which leaderboard to get data from.
+            name (str | None, optional): Name filter, case-insensitive. Defaults to None.
+            club_tag (str | None, optional): Club tag filter. Defaults to None.
+            exact_club_tag (bool | None, optional): Whether or not to filter by the EXACT club tag, if club_tag is not None. Defaults to None.
+            platform (Platform, optional): Required for OB, S1, and S2. Defaults to Platform.CROSSPLAY.
+        """
+        leaderboard = Leaderboard(leaderboard)
+        platform = Platform(platform)
+
+        path = f"/v1/leaderboard/{leaderboard.value}"
+
+        match leaderboard:
+            case Leaderboard.CB1 | Leaderboard.CB2:
+                pass
+            case Leaderboard.OB | Leaderboard.S1 | Leaderboard.S2:
+                path += f"/{platform.value}"
+            case _:
+                path += f"/crossplay"
+
+        params = {
+            "name": name,
+            "clubTag": club_tag,
+            "exactClubTag": exact_club_tag
+        }
+        params = {key: value for key, value in params.items() if value}
+
+        response = await self._async_client.get(
+            path,
+            params=params
+        )
+
+        response.raise_for_status()
+
+        try:
+            return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate_json(response.content)
+        except ValidationError as e:
+            raise ValueError("Could not convert leaderboard data to object") from e
