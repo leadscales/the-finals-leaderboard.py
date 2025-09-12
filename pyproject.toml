@@ -1,6 +1,6 @@
 [project]
 name = "the-finals-leaderboard.py"
-version = "0.1.0"
+version = "0.1.1"
 description = "A sync/async Python wrapper for the-finals-leaderboard.com, with some more user-friendly abstractions."
 authors = [{ name = "Leadscales" }]
 readme = "README.md"

@@ -93,6 +93,13 @@ class Leaderboard(StrEnum):
     S7TEAMDEATHMATCH = "s7teamdeathmatch"
     S7BLASTOFF = "s7blastoff"
     S7CASHBALL = "s7cashball"
+    S8 = "s8"
+    S8SPONSOR = "s8sponsor"
+    S8WORLDTOUR = "s8worldtour"
+    S8HEAD2HEAD = "s8head2head"
+    S8POWERSHIFT = "s8powershift"
+    S8QUICKCASH = "s8quickcash"
+    S8TEAMDEATHMATCH = "s8teamdeathmatch"
 
 
 class Platform(StrEnum):
@@ -138,4 +145,11 @@ LEADERBOARD_USER_MAP = {
     Leaderboard.S7TEAMDEATHMATCH: Season7TeamDeathmatchUser,
     Leaderboard.S7BLASTOFF: Season7BlastOffUser,
     Leaderboard.S7CASHBALL: Season7CashBallUser,
+    Leaderboard.S8: Season8RankedUser,
+    Leaderboard.S8SPONSOR: Season8SponsorUser,
+    Leaderboard.S8WORLDTOUR: Season8WorldTourUser,
+    Leaderboard.S8HEAD2HEAD: Season8Head2HeadUser,
+    Leaderboard.S8POWERSHIFT: Season8PowerShiftUser,
+    Leaderboard.S8QUICKCASH: Season8QuickCashUser,
+    Leaderboard.S8TEAMDEATHMATCH: Season8TeamDeathmatchUser,
 }
