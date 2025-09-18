@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Generic, List, TypeVar
+from typing import Generic, List, TypeVar, Tuple
 from pydantic import BaseModel, Field, field_validator, model_validator
 from the_finals_leaderboard.models import *
 
@@ -152,4 +152,49 @@ LEADERBOARD_USER_MAP = {
     Leaderboard.S8POWERSHIFT: Season8PowerShiftUser,
     Leaderboard.S8QUICKCASH: Season8QuickCashUser,
     Leaderboard.S8TEAMDEATHMATCH: Season8TeamDeathmatchUser,
+}
+
+LEADERBOARD_PLATFORM_MAP = {
+    Leaderboard.CB1: (),
+    Leaderboard.CB2: (),
+    Leaderboard.OB: (Platform.CROSSPLAY, Platform.STEAM, Platform.XBOX, Platform.PSN),
+    Leaderboard.S1: (Platform.CROSSPLAY, Platform.STEAM, Platform.XBOX, Platform.PSN),
+    Leaderboard.S2: (Platform.CROSSPLAY, Platform.STEAM, Platform.XBOX, Platform.PSN),
+    Leaderboard.S3: (Platform.CROSSPLAY,),
+    Leaderboard.S3ORIGINAL: (Platform.CROSSPLAY,),
+    Leaderboard.S3WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S4: (Platform.CROSSPLAY,),
+    Leaderboard.S4WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S4SPONSOR: (Platform.CROSSPLAY,),
+    Leaderboard.S5: (Platform.CROSSPLAY,),
+    Leaderboard.S5SPONSOR: (Platform.CROSSPLAY,),
+    Leaderboard.S5WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S5TERMINALATTACK: (Platform.CROSSPLAY,),
+    Leaderboard.S5POWERSHIFT: (Platform.CROSSPLAY,),
+    Leaderboard.S5QUICKCASH: (Platform.CROSSPLAY,),
+    Leaderboard.S5BANKIT: (Platform.CROSSPLAY,),
+    Leaderboard.S6: (Platform.CROSSPLAY,),
+    Leaderboard.S6SPONSOR: (Platform.CROSSPLAY,),
+    Leaderboard.S6WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S6TERMINALATTACK: (Platform.CROSSPLAY,),
+    Leaderboard.S6POWERSHIFT: (Platform.CROSSPLAY,),
+    Leaderboard.S6QUICKCASH: (Platform.CROSSPLAY,),
+    Leaderboard.S6TEAMDEATHMATCH: (Platform.CROSSPLAY,),
+    Leaderboard.S6HEAVYHITTERS: (Platform.CROSSPLAY,),
+    Leaderboard.S7: (Platform.CROSSPLAY,),
+    Leaderboard.S7SPONSOR: (Platform.CROSSPLAY,),
+    Leaderboard.S7WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S7TERMINALATTACK: (Platform.CROSSPLAY,),
+    Leaderboard.S7POWERSHIFT: (Platform.CROSSPLAY,),
+    Leaderboard.S7QUICKCASH: (Platform.CROSSPLAY,),
+    Leaderboard.S7TEAMDEATHMATCH: (Platform.CROSSPLAY,),
+    Leaderboard.S7BLASTOFF: (Platform.CROSSPLAY,),
+    Leaderboard.S7CASHBALL: (Platform.CROSSPLAY,),
+    Leaderboard.S8: (Platform.CROSSPLAY,),
+    Leaderboard.S8SPONSOR: (Platform.CROSSPLAY,),
+    Leaderboard.S8WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S8HEAD2HEAD: (Platform.CROSSPLAY,),
+    Leaderboard.S8POWERSHIFT: (Platform.CROSSPLAY,),
+    Leaderboard.S8QUICKCASH: (Platform.CROSSPLAY,),
+    Leaderboard.S8TEAMDEATHMATCH: (Platform.CROSSPLAY,),
 }
