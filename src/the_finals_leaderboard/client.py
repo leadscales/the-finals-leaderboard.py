@@ -172,6 +172,8 @@ class Client():
 
         return response.json()
 
+    # ---
+
     def get_leaderboard_sync(
         self,
         leaderboard: Leaderboard,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import TypeAlias, Union
 from pydantic import BaseModel, field_validator, model_validator
 
@@ -118,6 +118,30 @@ class RankedLeague(StrEnum):
     DIAMOND_2 = "Diamond 2"
     DIAMOND_1 = "Diamond 1"
     RUBY = "Ruby"
+
+
+class LeagueNumber(IntEnum):
+    BRONZE_4 = 1
+    BRONZE_3 = 2
+    BRONZE_2 = 3
+    BRONZE_1 = 4
+    SILVER_4 = 5
+    SILVER_3 = 6
+    SILVER_2 = 7
+    SILVER_1 = 8
+    GOLD_4 = 9
+    GOLD_3 = 10
+    GOLD_2 = 11
+    GOLD_1 = 12
+    PLATINUM_4 = 13
+    PLATINUM_3 = 14
+    PLATINUM_2 = 15
+    PLATINUM_1 = 16
+    DIAMOND_4 = 17
+    DIAMOND_3 = 18
+    DIAMOND_2 = 19
+    DIAMOND_1 = 20
+    RUBY = 21
 
 
 def _to_camel(string: str) -> str:
@@ -260,7 +284,7 @@ class Season1RankedUser(RankedUser):
 
 class Season2RankedUser(RankedUser):
     change: int
-    league_number: int
+    league_number: LeagueNumber
 
     @property
     def score(self):
@@ -268,7 +292,8 @@ class Season2RankedUser(RankedUser):
 
 
 class Season3RankedUser(RankedUser):
-    league_number: int
+    change: int
+    league_number: LeagueNumber
     rank_score: int
 
     @property
@@ -282,6 +307,7 @@ class Season3WorldTourUser(WorldTourUser):
 
 class Season4RankedUser(RankedUser):
     change: int
+    league_number: LeagueNumber
     rank_score: int
 
     @property
@@ -299,6 +325,7 @@ class Season4SponsorUser(SponsorUser):
 
 class Season5RankedUser(RankedUser, TaggedUser):
     change: int
+    league_number: LeagueNumber
     rank_score: int
 
     @property
@@ -332,6 +359,7 @@ class Season5BankItUser(BankItUser, TaggedUser):
 
 class Season6RankedUser(RankedUser, TaggedUser):
     change: int
+    league_number: LeagueNumber
     rank_score: int
 
     @property
@@ -374,6 +402,7 @@ class Season6HeavyHittersUser(BaseUser, TaggedUser):
 
 class Season7RankedUser(RankedUser, TaggedUser):
     change: int
+    league_number: LeagueNumber
     rank_score: int
 
     @property
@@ -425,6 +454,7 @@ class Season7CashBallUser(BaseUser, TaggedUser):
 
 class Season8RankedUser(RankedUser, TaggedUser):
     change: int
+    league_number: LeagueNumber
     rank_score: int
 
     @property
