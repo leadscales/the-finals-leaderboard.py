@@ -5,6 +5,7 @@ from typing import Literal
 import logging
 import httpx
 import warnings
+import aiofiles
 import json
 from pydantic import ValidationError
 from the_finals_leaderboard.api import *
@@ -86,6 +87,35 @@ class Client():
 
         return filtered
 
+    async def _get_leaderboard_async_cached(
+        self,
+        leaderboard: Leaderboard,
+        name: str | None = None,
+        club_tag: str | None = None,
+        exact_club_tag: bool | None = None,
+        platform: Platform = Platform.CROSSPLAY
+    ) -> dict:
+        leaderboard = Leaderboard(leaderboard)
+        platform = Platform(platform)
+
+        path = Client._cache_path(Client._api_path(leaderboard, platform))
+
+        if not path.exists():
+            raise ValueError(f"Cached data for {leaderboard.value} does not exist")
+
+        async with aiofiles.open(path/"data.json", "rb") as fp:
+            _data = await fp.read()
+            data = json.loads(_data)
+
+        filtered = faithful_leaderboard_filter(
+            data,
+            name=name,
+            club_tag=club_tag,
+            exact_club_tag=exact_club_tag
+        )
+
+        return filtered
+
     def _get_leaderboard_sync(
         self,
         leaderboard: Leaderboard,
@@ -107,6 +137,34 @@ class Client():
         params = {key: value for key, value in params.items() if value}
 
         response = self._sync_client.get(
+            path.as_posix(),
+            params=params
+        )
+        response.raise_for_status()
+
+        return response.json()
+
+    async def _get_leaderboard_async(
+        self,
+        leaderboard: Leaderboard,
+        name: str | None = None,
+        club_tag: str | None = None,
+        exact_club_tag: bool | None = None,
+        platform: Platform = Platform.CROSSPLAY
+    ) -> dict:
+        leaderboard = Leaderboard(leaderboard)
+        platform = Platform(platform)
+
+        path = Client._api_path(leaderboard, platform)
+
+        params = {
+            "name": name,
+            "clubTag": club_tag,
+            "exactClubTag": exact_club_tag
+        }
+        params = {key: value for key, value in params.items() if value}
+
+        response = await self._async_client.get(
             path.as_posix(),
             params=params
         )
@@ -192,23 +250,38 @@ class Client():
         leaderboard = Leaderboard(leaderboard)
         platform = Platform(platform)
 
-        path = Client._api_path(leaderboard, platform)
-
-        params = {
-            "name": name,
-            "clubTag": club_tag,
-            "exactClubTag": exact_club_tag
-        }
-        params = {key: value for key, value in params.items() if value}
-
-        response = await self._async_client.get(
-            path.as_posix(),
-            params=params
-        )
-
-        response.raise_for_status()
+        logger.info(f"Async get for {leaderboard.value} issued.")
+        if self.use_cached:
+            logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
+            try:
+                data = await self._get_leaderboard_async_cached(
+                    leaderboard,
+                    name,
+                    club_tag,
+                    exact_club_tag,
+                    platform
+                )
+                logger.info("...Found!")
+            except ValueError:
+                data = await self._get_leaderboard_async(
+                    leaderboard,
+                    name,
+                    club_tag,
+                    exact_club_tag,
+                    platform
+                )
+                logger.info("...Not found, falling back to live data from API.")
+        else:
+            logger.info("Skipping cache.")
+            data = await self._get_leaderboard_async(
+                leaderboard,
+                name,
+                club_tag,
+                exact_club_tag,
+                platform
+            )
 
         try:
-            return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate_json(response.content)
+            return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate(data)
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
