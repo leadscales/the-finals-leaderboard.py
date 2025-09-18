@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any, Generic, List, TypeVar, Tuple
+from typing import Any, Generic, List, TypeVar
 from pydantic import BaseModel, Field, field_validator, model_validator
 from the_finals_leaderboard.models import *
 

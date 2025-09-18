@@ -3,7 +3,6 @@ from __future__ import annotations
 import operator
 from enum import Enum
 from typing import Any, Callable, List, TypeVar
-
 from pydantic import BaseModel
 
 OPS: dict[str, Callable[[Any, Any], bool]] = {
@@ -77,7 +76,19 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def extended_leaderboard_filter(players: List[T], **filters) -> List[T]:
+    if not players:
+        return []
+
     results = players
+    cls = players[0].__class__
+    model_fields = cls.model_fields
+
+    props = set()
+    for base in cls.__mro__:
+        props.update(
+            name for name, attr in base.__dict__.items() if isinstance(attr, property)
+        )
+
     for key, expected in filters.items():
         if "__" in key:
             field, op = key.split("__", 1)
@@ -89,7 +100,7 @@ def extended_leaderboard_filter(players: List[T], **filters) -> List[T]:
 
         func = OPS[op]
 
-        if field not in players[0].__class__.model_fields:
+        if field not in model_fields and field not in props:
             continue
 
         results = [

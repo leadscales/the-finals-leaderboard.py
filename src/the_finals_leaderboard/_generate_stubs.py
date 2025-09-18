@@ -19,7 +19,7 @@ def generate_client():
         "",
         "",
         "class Client():",
-        "    def __init__(self, url: str = 'https://api.the-finals-leaderboard.com', timeout: float = 10.0): ...",
+        "    def __init__(self, use_cached: bool = False, url: str = 'https://api.the-finals-leaderboard.com', timeout: float = 10.0): ...",
         "",
     ]
 
@@ -32,8 +32,24 @@ def generate_client():
         )
         stub_lines.append("    @overload")
         stub_lines.append(
+            f"    def get_leaderboard_sync_ex(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
+            f"platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, "
+            f"/, "
+            f"**filters: ...) "
+            f"-> LeaderboardResult[{value.__name__}]: ..."
+        )
+        stub_lines.append("    @overload")
+        stub_lines.append(
             f"    async def get_leaderboard_async(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
             f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY) "
+            f"-> LeaderboardResult[{value.__name__}]: ..."
+        )
+        stub_lines.append("    @overload")
+        stub_lines.append(
+            f"    async def get_leaderboard_async_ex(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
+            f"platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, "
+            f"/, "
+            f"**filters: ...) "
             f"-> LeaderboardResult[{value.__name__}]: ..."
         )
         stub_lines.append("")

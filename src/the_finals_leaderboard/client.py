@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import logging
 import httpx
-import warnings
 import aiofiles
 import json
 from pydantic import ValidationError
 from pathlib import Path, PurePath
-from typing import Literal
 from the_finals_leaderboard.api import *
 from the_finals_leaderboard.models import *
 from the_finals_leaderboard.filtering import *
@@ -231,10 +229,11 @@ class Client():
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
 
-    def get_leaderboard_sync_ext(
+    def get_leaderboard_sync_ex(
         self,
         leaderboard: Leaderboard,
         platform: Platform = Platform.CROSSPLAY,
+        /,
         **filters
     ):
         leaderboard = Leaderboard(leaderboard)
@@ -276,7 +275,7 @@ class Client():
 
         filtered = extended_leaderboard_filter(validated, **filters)
 
-        return LeaderboardResultEX(
+        return LeaderboardResultEX[validate_type](
             leaderboard=leaderboard,
             platform=platform,
             filters=filters,
@@ -340,10 +339,11 @@ class Client():
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
 
-    async def get_leaderboard_async_ext(
+    async def get_leaderboard_async_ex(
         self,
         leaderboard: Leaderboard,
         platform: Platform = Platform.CROSSPLAY,
+        /,
         **filters
     ):
         leaderboard = Leaderboard(leaderboard)
@@ -385,7 +385,7 @@ class Client():
 
         filtered = extended_leaderboard_filter(validated, **filters)
 
-        return LeaderboardResultEX(
+        return LeaderboardResultEX[validate_type](
             leaderboard=leaderboard,
             platform=platform,
             filters=filters,
