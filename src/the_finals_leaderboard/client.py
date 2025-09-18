@@ -1,6 +1,4 @@
 from __future__ import annotations
-from pathlib import Path, PurePath
-from typing import Literal
 
 import logging
 import httpx
@@ -8,6 +6,8 @@ import warnings
 import aiofiles
 import json
 from pydantic import ValidationError
+from pathlib import Path, PurePath
+from typing import Literal
 from the_finals_leaderboard.api import *
 from the_finals_leaderboard.models import *
 from the_finals_leaderboard.filtering import *
@@ -231,6 +231,58 @@ class Client():
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
 
+    def get_leaderboard_sync_ext(
+        self,
+        leaderboard: Leaderboard,
+        platform: Platform = Platform.CROSSPLAY,
+        **filters
+    ):
+        leaderboard = Leaderboard(leaderboard)
+        platform = Platform(platform)
+
+        logger.info(f"Sync get for {leaderboard.value} issued.")
+        if self.use_cached:
+            logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
+            try:
+                data = self._get_leaderboard_sync_cached(
+                    leaderboard,
+                    None,
+                    None,
+                    None,
+                    platform
+                )
+                logger.info("...Found!")
+            except ValueError:
+                data = self._get_leaderboard_sync(
+                    leaderboard,
+                    None,
+                    None,
+                    None,
+                    platform
+                )
+                logger.info("...Not found, falling back to live data from API.")
+        else:
+            logger.info("Skipping cache.")
+            data = self._get_leaderboard_sync(
+                leaderboard,
+                None,
+                None,
+                None,
+                platform
+            )
+
+        validate_type = LEADERBOARD_USER_MAP[leaderboard]
+        validated = [validate_type.model_validate(i) for i in data["data"]]
+
+        filtered = extended_leaderboard_filter(validated, **filters)
+
+        return LeaderboardResultEX(
+            leaderboard=leaderboard,
+            platform=platform,
+            filters=filters,
+            data=filtered
+        )
+
     async def get_leaderboard_async(
         self,
         leaderboard: Leaderboard,
@@ -287,3 +339,55 @@ class Client():
             return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate(data)
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
+
+    async def get_leaderboard_async_ext(
+        self,
+        leaderboard: Leaderboard,
+        platform: Platform = Platform.CROSSPLAY,
+        **filters
+    ):
+        leaderboard = Leaderboard(leaderboard)
+        platform = Platform(platform)
+
+        logger.info(f"Async get for {leaderboard.value} issued.")
+        if self.use_cached:
+            logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
+            try:
+                data = await self._get_leaderboard_async_cached(
+                    leaderboard,
+                    None,
+                    None,
+                    None,
+                    platform
+                )
+                logger.info("...Found!")
+            except ValueError:
+                data = await self._get_leaderboard_async(
+                    leaderboard,
+                    None,
+                    None,
+                    None,
+                    platform
+                )
+                logger.info("...Not found, falling back to live data from API.")
+        else:
+            logger.info("Skipping cache.")
+            data = await self._get_leaderboard_async(
+                leaderboard,
+                None,
+                None,
+                None,
+                platform
+            )
+
+        validate_type = LEADERBOARD_USER_MAP[leaderboard]
+        validated = [validate_type.model_validate(i) for i in data["data"]]
+
+        filtered = extended_leaderboard_filter(validated, **filters)
+
+        return LeaderboardResultEX(
+            leaderboard=leaderboard,
+            platform=platform,
+            filters=filters,
+            data=filtered
+        )

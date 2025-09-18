@@ -1,4 +1,28 @@
-from typing import Any
+from __future__ import annotations
+
+import operator
+from enum import Enum
+from typing import Any, Callable, List, TypeVar
+
+from pydantic import BaseModel
+
+OPS: dict[str, Callable[[Any, Any], bool]] = {
+    "eq": operator.eq,
+    "ne": operator.ne,
+    "lt": operator.lt,
+    "lte": operator.le,
+    "gt": operator.gt,
+    "gte": operator.ge,
+    "contains": lambda a, b: b.casefold() in a.casefold() if isinstance(a, str) else False,
+    "iexact": lambda a, b: a.casefold() == b.casefold() if isinstance(a, str) else False,
+    "in": lambda a, b: a in b if isinstance(b, (list, tuple, set)) else False,
+}
+
+
+def normalize(value: Any) -> Any:
+    if isinstance(value, Enum):
+        return value.value
+    return value
 
 
 def match_insen_wild(haystack: str, needle: str):
@@ -48,3 +72,29 @@ def faithful_leaderboard_filter(data: dict, name: str | None = None, club_tag: s
 
     return result
 
+
+T = TypeVar("T", bound=BaseModel)
+
+
+def extended_leaderboard_filter(players: List[T], **filters) -> List[T]:
+    results = players
+    for key, expected in filters.items():
+        if "__" in key:
+            field, op = key.split("__", 1)
+        else:
+            field, op = key, "eq"
+
+        if op not in OPS:
+            raise ValueError(f"Unsupported operator: {op}")
+
+        func = OPS[op]
+
+        if field not in players[0].__class__.model_fields:
+            continue
+
+        results = [
+            p for p in results
+            if func(normalize(getattr(p, field)), normalize(expected))
+        ]
+
+    return results

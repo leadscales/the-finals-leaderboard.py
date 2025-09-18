@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Generic, List, TypeVar, Tuple
+from typing import Any, Generic, List, TypeVar, Tuple
 from pydantic import BaseModel, Field, field_validator, model_validator
 from the_finals_leaderboard.models import *
 
@@ -11,6 +11,18 @@ T = TypeVar("T")
 def _to_camel(string: str) -> str:
     parts = string.split("_")
     return parts[0] + "".join(word.capitalize() for word in parts[1:])
+
+
+class LeaderboardResultEX(BaseModel, Generic[T]):
+    leaderboard: Leaderboard
+    platform: Platform
+    filters: dict[str, Any]
+    players: List[T] = Field(alias="data")
+
+    model_config = {
+        "alias_generator": _to_camel,
+        "populate_by_name": True,
+    }
 
 
 class LeaderboardResult(BaseModel, Generic[T]):
