@@ -174,8 +174,6 @@ class Client():
         leaderboard = api.Leaderboard(leaderboard)
         platform = Client._parse_platform(leaderboard, platform)
 
-        print(ignore_cache)
-
         data = None
         if not ignore_cache:
             data = self._get_leaderboard_from_cache(leaderboard, platform)
