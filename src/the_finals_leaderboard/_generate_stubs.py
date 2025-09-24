@@ -41,14 +41,18 @@ def generate_client():
         stub_lines.append(
             f"    def get_leaderboard_sync(self, leaderboard: Literal[api.Leaderboard.{key.name}, {repr(key.value)}], "
             f"platform: api.Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] | None = None, "
-            f"filters: Mapping[str, Any] | None = None) "
+            f"ignore_cache: bool = False, "
+            f"/, "
+            f"**filters: Any) "
             f"-> api.LeaderboardResult[models.{value.__name__}]: ..."
         )
         stub_lines.append("    @overload")
         stub_lines.append(
             f"    async def get_leaderboard_async(self, leaderboard: Literal[api.Leaderboard.{key.name}, {repr(key.value)}], "
             f"platform: api.Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] | None = None, "
-            f"filters: Mapping[str, Any] | None = None) "
+            f"ignore_cache: bool = False, "
+            f"/, "
+            f"**filters: Any) "
             f"-> api.LeaderboardResult[models.{value.__name__}]: ..."
         )
         stub_lines.append("")

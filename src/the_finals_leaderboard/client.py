@@ -167,11 +167,14 @@ class Client():
         self,
         leaderboard: api.Leaderboard,
         platform: api.Platform | None = None,
-        filters: Mapping[str, Any] | None = None,
-        ignore_cache: bool = False
+        ignore_cache: bool = False,
+        /,
+        **filters: Any,
     ):
         leaderboard = api.Leaderboard(leaderboard)
         platform = Client._parse_platform(leaderboard, platform)
+
+        print(ignore_cache)
 
         data = None
         if not ignore_cache:
@@ -192,8 +195,9 @@ class Client():
         self,
         leaderboard: api.Leaderboard,
         platform: api.Platform | None = None,
-        filters: Mapping[str, Any] | None = None,
-        ignore_cache: bool = False
+        ignore_cache: bool = False,
+        /,
+        **filters: Mapping[str, Any] | None,
     ):
         leaderboard = api.Leaderboard(leaderboard)
         platform = Client._parse_platform(leaderboard, platform)

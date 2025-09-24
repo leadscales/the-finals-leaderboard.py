@@ -6,30 +6,42 @@ A sync/async Python wrapper for the-finals-leaderboard.com, with some more user-
 
 ---
 
+No PyPI module yet, you'll need to install it from the repo.
+Not intended for production use yet.
+
+
 ## Features
-- Both sync and async interfaces.
-- Every returnable model has a `score` property, which returns whatever value is used to calculate a player's rank. No more conditional and match statements for what is effectively the same data between types.
-- All models are Pydantic models, and are inherited from other models (e.g. `Season7PowerShiftUser = PowerShiftUser (+TaggedUser) = QuickPlayUser = BaseUser`), which simplifies data comparison between similar leaderboards.
-- "Convience Types" (e.g. `Season7User = Season7RankedUser | Season7SponsorUser | ...`), which also simplifies data comparison.
-- Some more Pythonic changes, such as empty data from the API being converted to `None`.
+
+- **Both sync and async interfaces.**
+- **Django-style filters** (e.g., `score__gte=100_000`).
+- **Caching for both "static" and "live" leaderboards.**
+- **Generics** (e.g., `LeaderboardResult[Season7RankedUser]`).
+- **"Convenience" properties** (e.g, `score`).
+- **"Convenience" types** (e.g. `Season7User = Season7RankedUser | Season7SponsorUser | ...`)
+- Pydantic inheritance.
+- Various Pythonic changes, such as empty data from the API being converted to `None`.
 - Works with the "official" instance, and self-hosted instances.
 
 ## Usage
 
 ```py
->>> import the_finals_leaderboard
+import the_finals_leaderboard
 
-# Getting a leaderboard with filters
->>> client = the_finals_leaderboard.Client()
->>> client.get_leaderboard_sync(leaderboard="s7powershift",club_tag="TM",exact_club_tag=True)
-LeaderboardResult[Season7PowershiftUser](...)
+client = the_finals_leaderboard.Client(
+    static_caching_policy="lazy",  # Lazily load stored instances of old leaderboards from the disk, bundled with the module, as opposed from fetching them from the API.
+    live_caching_ttl=300  # Save results for 5 minutes, avoiding having to wait to a response from the API.
+)
 
-# Connecting to your own instance
->>> client = the_finals_leaderboard.Client(url="http://127.0.0.1:8787")
+results = client.get_leaderboard_sync(
+    "s8powershift",  # Or the_finals_leaderboard.Leaderboard.S8POWERSHIFT. Positional only.
+    "crossplay",
+    True,  # Ignore the cache this once, positional only.
+    score__gte=100_000  # Django-style filters!
+)  # -> LeaderboardResult[Season8PowerShiftUser]
 
-# Fetching data asynchronously
->>> client = the_finals_leaderboard.Client()
->>> # ... Some async function ...
->>> result = await client.get_leaderboard_async(leaderboard=the_finals_leaderboard.Leaderboard.S6)
-result = LeaderboardResult[Season6RankedUser]
+print(results.players)  # View the results.
+
+results = results.filter(club_tag__iexact="TM")  # Filter it some more.
+
+print(results.players)  # View the newly filtered results.
 ```
