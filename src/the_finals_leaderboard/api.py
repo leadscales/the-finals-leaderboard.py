@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from copy import deepcopy
 from enum import StrEnum
-from typing import Any, Dict, Generic, List, TypeVar
-from pydantic import BaseModel, Field, field_validator, model_validator
-from the_finals_leaderboard.filtering import *
-from the_finals_leaderboard.models import *
+from typing import Any, Generic, Type, TypeVar
+from pydantic import BaseModel, Field, model_validator
+from the_finals_leaderboard import filtering, models
 
 T = TypeVar("T")
 
@@ -18,12 +17,9 @@ def _to_camel(string: str) -> str:
 class LeaderboardResult(BaseModel, Generic[T]):
     leaderboard: Leaderboard
     platform: Platform | None = None
-    name_filter: str | None = None
-    club_tag_filter: str | None = None
-    exact_club_tag: bool | None = None
-    filters: Dict[str, Any] | None = None
+    filters: dict[str, Any] | None = None
 
-    players: List[T] = Field(alias="data")
+    players: list[T] = Field(alias="data")
 
     model_config = {
         "alias_generator": _to_camel,
@@ -38,9 +34,6 @@ class LeaderboardResult(BaseModel, Generic[T]):
         mapping = {
             "leaderboardVersion": "leaderboard",
             "leaderboardPlatform": "platform",
-            "exactClubTag": "exact_club_tag",
-            "nameFilter": "name_filter",
-            "clubTagFilter": "club_tag_filter",
         }
 
         for json_key, model_field in mapping.items():
@@ -53,16 +46,9 @@ class LeaderboardResult(BaseModel, Generic[T]):
 
         return values
 
-    @field_validator("club_tag_filter")
-    @classmethod
-    def uppercase(cls, value):
-        if value is None:
-            return None
-        return value.upper()
-
     def filter(self, **filters):
         new = deepcopy(self)
-        new.players = extended_filter(new.players, **filters)
+        new.players = filtering.extended_filter(new.players, **filters)
         new.filters = filters
         return new
 
@@ -119,49 +105,49 @@ class Platform(StrEnum):
     PSN = "psn"
 
 
-LEADERBOARD_USER_MAP = {
-    Leaderboard.CB1: CB1RankedUser,
-    Leaderboard.CB2: CB2RankedUser,
-    Leaderboard.OB: OBRankedUser,
-    Leaderboard.S1: Season1RankedUser,
-    Leaderboard.S2: Season2RankedUser,
-    Leaderboard.S3: Season3RankedUser,
-    Leaderboard.S3ORIGINAL: Season3RankedUser,
-    Leaderboard.S3WORLDTOUR: Season3WorldTourUser,
-    Leaderboard.S4: Season4RankedUser,
-    Leaderboard.S4WORLDTOUR: Season4WorldTourUser,
-    Leaderboard.S4SPONSOR: Season4SponsorUser,
-    Leaderboard.S5: Season5RankedUser,
-    Leaderboard.S5SPONSOR: Season5SponsorUser,
-    Leaderboard.S5WORLDTOUR: Season5WorldTourUser,
-    Leaderboard.S5TERMINALATTACK: Season5TerminalAttackUser,
-    Leaderboard.S5POWERSHIFT: Season5PowerShiftUser,
-    Leaderboard.S5QUICKCASH: Season5QuickCashUser,
-    Leaderboard.S5BANKIT: Season5BankItUser,
-    Leaderboard.S6: Season6RankedUser,
-    Leaderboard.S6SPONSOR: Season6SponsorUser,
-    Leaderboard.S6WORLDTOUR: Season6WorldTourUser,
-    Leaderboard.S6TERMINALATTACK: Season6TerminalAttackUser,
-    Leaderboard.S6POWERSHIFT: Season6PowerShiftUser,
-    Leaderboard.S6QUICKCASH: Season6QuickCashUser,
-    Leaderboard.S6TEAMDEATHMATCH: Season6TeamDeathmatchUser,
-    Leaderboard.S6HEAVYHITTERS: Season6HeavyHittersUser,
-    Leaderboard.S7: Season7RankedUser,
-    Leaderboard.S7SPONSOR: Season7SponsorUser,
-    Leaderboard.S7WORLDTOUR: Season7WorldTourUser,
-    Leaderboard.S7TERMINALATTACK: Season7TerminalAttackUser,
-    Leaderboard.S7POWERSHIFT: Season7PowerShiftUser,
-    Leaderboard.S7QUICKCASH: Season7QuickCashUser,
-    Leaderboard.S7TEAMDEATHMATCH: Season7TeamDeathmatchUser,
-    Leaderboard.S7BLASTOFF: Season7BlastOffUser,
-    Leaderboard.S7CASHBALL: Season7CashBallUser,
-    Leaderboard.S8: Season8RankedUser,
-    Leaderboard.S8SPONSOR: Season8SponsorUser,
-    Leaderboard.S8WORLDTOUR: Season8WorldTourUser,
-    Leaderboard.S8HEAD2HEAD: Season8Head2HeadUser,
-    Leaderboard.S8POWERSHIFT: Season8PowerShiftUser,
-    Leaderboard.S8QUICKCASH: Season8QuickCashUser,
-    Leaderboard.S8TEAMDEATHMATCH: Season8TeamDeathmatchUser,
+LEADERBOARD_USER_MAP: dict[Leaderboard, Type[models.BaseUser]] = {
+    Leaderboard.CB1: models.CB1RankedUser,
+    Leaderboard.CB2: models.CB2RankedUser,
+    Leaderboard.OB: models.OBRankedUser,
+    Leaderboard.S1: models.Season1RankedUser,
+    Leaderboard.S2: models.Season2RankedUser,
+    Leaderboard.S3: models.Season3RankedUser,
+    Leaderboard.S3ORIGINAL: models.Season3RankedUser,
+    Leaderboard.S3WORLDTOUR: models.Season3WorldTourUser,
+    Leaderboard.S4: models.Season4RankedUser,
+    Leaderboard.S4WORLDTOUR: models.Season4WorldTourUser,
+    Leaderboard.S4SPONSOR: models.Season4SponsorUser,
+    Leaderboard.S5: models.Season5RankedUser,
+    Leaderboard.S5SPONSOR: models.Season5SponsorUser,
+    Leaderboard.S5WORLDTOUR: models.Season5WorldTourUser,
+    Leaderboard.S5TERMINALATTACK: models.Season5TerminalAttackUser,
+    Leaderboard.S5POWERSHIFT: models.Season5PowerShiftUser,
+    Leaderboard.S5QUICKCASH: models.Season5QuickCashUser,
+    Leaderboard.S5BANKIT: models.Season5BankItUser,
+    Leaderboard.S6: models.Season6RankedUser,
+    Leaderboard.S6SPONSOR: models.Season6SponsorUser,
+    Leaderboard.S6WORLDTOUR: models.Season6WorldTourUser,
+    Leaderboard.S6TERMINALATTACK: models.Season6TerminalAttackUser,
+    Leaderboard.S6POWERSHIFT: models.Season6PowerShiftUser,
+    Leaderboard.S6QUICKCASH: models.Season6QuickCashUser,
+    Leaderboard.S6TEAMDEATHMATCH: models.Season6TeamDeathmatchUser,
+    Leaderboard.S6HEAVYHITTERS: models.Season6HeavyHittersUser,
+    Leaderboard.S7: models.Season7RankedUser,
+    Leaderboard.S7SPONSOR: models.Season7SponsorUser,
+    Leaderboard.S7WORLDTOUR: models.Season7WorldTourUser,
+    Leaderboard.S7TERMINALATTACK: models.Season7TerminalAttackUser,
+    Leaderboard.S7POWERSHIFT: models.Season7PowerShiftUser,
+    Leaderboard.S7QUICKCASH: models.Season7QuickCashUser,
+    Leaderboard.S7TEAMDEATHMATCH: models.Season7TeamDeathmatchUser,
+    Leaderboard.S7BLASTOFF: models.Season7BlastOffUser,
+    Leaderboard.S7CASHBALL: models.Season7CashBallUser,
+    Leaderboard.S8: models.Season8RankedUser,
+    Leaderboard.S8SPONSOR: models.Season8SponsorUser,
+    Leaderboard.S8WORLDTOUR: models.Season8WorldTourUser,
+    Leaderboard.S8HEAD2HEAD: models.Season8Head2HeadUser,
+    Leaderboard.S8POWERSHIFT: models.Season8PowerShiftUser,
+    Leaderboard.S8QUICKCASH: models.Season8QuickCashUser,
+    Leaderboard.S8TEAMDEATHMATCH: models.Season8TeamDeathmatchUser,
 }
 
 LEADERBOARD_PLATFORM_MAP = {
@@ -208,3 +194,13 @@ LEADERBOARD_PLATFORM_MAP = {
     Leaderboard.S8QUICKCASH: (Platform.CROSSPLAY,),
     Leaderboard.S8TEAMDEATHMATCH: (Platform.CROSSPLAY,),
 }
+
+CURRENT_SEASON_LEADERBOARDS = (
+    Leaderboard.S8,
+    Leaderboard.S8SPONSOR,
+    Leaderboard.S8WORLDTOUR,
+    Leaderboard.S8HEAD2HEAD,
+    Leaderboard.S8POWERSHIFT,
+    Leaderboard.S8QUICKCASH,
+    Leaderboard.S8TEAMDEATHMATCH,
+)

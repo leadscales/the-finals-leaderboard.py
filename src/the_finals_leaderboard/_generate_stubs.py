@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from the_finals_leaderboard.models import *
-from the_finals_leaderboard.api import *
+from the_finals_leaderboard import models, api
 
 SCRIPT_DIR = Path(__file__).parent
 
@@ -11,30 +10,46 @@ def generate_client():
     stub_lines = [
         "from __future__ import annotations",
         "",
-        "from the_finals_leaderboard.api import *",
-        "from the_finals_leaderboard.models import *",
-        "from typing import Literal, overload, Mapping",
+        "import datetime",
+        "from the_finals_leaderboard import models, api",
+        "from typing import Literal, overload, Mapping, Any",
+        "from enum import StrEnum",
         "",
-        "# The pit of overloads",
+        "",
+        "class StaticCachingPolicy(StrEnum):",
+        "    DISABLED = \"disabled\"",
+        "    DISK = \"disk\"",
+        "    LAZY = \"lazy\"",
+        "    EAGER = \"eager\"",
         "",
         "",
         "class Client():",
-        "    def __init__(self, use_cached: bool = False, url: str = 'https://api.the-finals-leaderboard.com', timeout: float = 10.0): ...",
+        "    def __init__(",
+        "        self,",
+        "        static_caching_policy: Literal[StaticCachingPolicy.DISABLED, StaticCachingPolicy.DISK, StaticCachingPolicy.LAZY, StaticCachingPolicy.EAGER, \"disabled\", \"disk\", \"lazy\", \"eager\"] = StaticCachingPolicy.LAZY,",
+        "        live_caching_ttl: datetime.timedelta | int = datetime.timedelta(minutes=5),",
+        "        url: str = \"https://api.the-finals-leaderboard.com\",",
+        "        timeout: float = 10.0",
+        "    ): ...",
+        "",
+        "    # The pit of overloads",
         "",
     ]
 
-    for key, value in LEADERBOARD_USER_MAP.items():
+    for key, value in api.LEADERBOARD_USER_MAP.items():
         stub_lines.append("    @overload")
         stub_lines.append(
-            f"    def get_leaderboard_sync(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
-            f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, filters: Mapping[str, Any] | None = None) "
-            f"-> LeaderboardResult[{value.__name__}]: ..."
+            f"    def get_leaderboard_sync(self, leaderboard: Literal[api.Leaderboard.{key.name}, {repr(key.value)}], "
+            f"platform: api.Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] | None = None, "
+            f"filters: Mapping[str, Any] | None = None) "
+            f"-> api.LeaderboardResult[models.{value.__name__}]: ..."
         )
         stub_lines.append("    @overload")
         stub_lines.append(
-            f"    async def get_leaderboard_async(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
-            f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, filters: Mapping[str, Any] | None = None) "
-            f"-> LeaderboardResult[{value.__name__}]: ..."
+            f"    async def get_leaderboard_async(self, leaderboard: Literal[api.Leaderboard.{key.name}, {repr(key.value)}], "
+            f"platform: api.Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] | None = None, "
+            f"filters: Mapping[str, Any] | None = None) "
+            f"-> api.LeaderboardResult[models.{value.__name__}]: ..."
         )
         stub_lines.append("")
 
