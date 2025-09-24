@@ -13,7 +13,7 @@ def generate_client():
         "",
         "from the_finals_leaderboard.api import *",
         "from the_finals_leaderboard.models import *",
-        "from typing import Literal, overload",
+        "from typing import Literal, overload, Mapping",
         "",
         "# The pit of overloads",
         "",
@@ -27,29 +27,13 @@ def generate_client():
         stub_lines.append("    @overload")
         stub_lines.append(
             f"    def get_leaderboard_sync(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
-            f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY) "
-            f"-> LeaderboardResult[{value.__name__}]: ..."
-        )
-        stub_lines.append("    @overload")
-        stub_lines.append(
-            f"    def get_leaderboard_sync_ex(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
-            f"platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, "
-            f"/, "
-            f"**filters: ...) "
+            f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, filters: Mapping[str, Any] | None = None) "
             f"-> LeaderboardResult[{value.__name__}]: ..."
         )
         stub_lines.append("    @overload")
         stub_lines.append(
             f"    async def get_leaderboard_async(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
-            f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY) "
-            f"-> LeaderboardResult[{value.__name__}]: ..."
-        )
-        stub_lines.append("    @overload")
-        stub_lines.append(
-            f"    async def get_leaderboard_async_ex(self, leaderboard: Literal[Leaderboard.{key.name}, {repr(key.value)}], "
-            f"platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, "
-            f"/, "
-            f"**filters: ...) "
+            f"name: str | None = None, club_tag: str | None = None, exact_club_tag: bool | None = None, platform: Platform | Literal['crossplay', 'steam', 'xbox', 'psn'] = Platform.CROSSPLAY, filters: Mapping[str, Any] | None = None) "
             f"-> LeaderboardResult[{value.__name__}]: ..."
         )
         stub_lines.append("")

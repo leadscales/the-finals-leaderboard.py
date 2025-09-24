@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import logging
+from typing import Mapping
 import httpx
-import aiofiles
 import json
 from pydantic import ValidationError
 from pathlib import Path, PurePath
@@ -57,7 +57,7 @@ class Client():
     def _cache_path(path: PurePath):
         return CACHED_DATA_PATH / PurePath(*path.parts[1:])
 
-    def _get_leaderboard_sync_cached(
+    def _get_leaderboard_cached(
         self,
         leaderboard: Leaderboard,
         name: str | None = None,
@@ -76,36 +76,7 @@ class Client():
         with open(path/"data.json", "rb") as fp:
             data: dict = json.load(fp)
 
-        filtered = faithful_leaderboard_filter(
-            data,
-            name=name,
-            club_tag=club_tag,
-            exact_club_tag=exact_club_tag
-        )
-
-        return filtered
-
-    async def _get_leaderboard_async_cached(
-        self,
-        leaderboard: Leaderboard,
-        name: str | None = None,
-        club_tag: str | None = None,
-        exact_club_tag: bool | None = None,
-        platform: Platform = Platform.CROSSPLAY
-    ) -> dict:
-        leaderboard = Leaderboard(leaderboard)
-        platform = Platform(platform)
-
-        path = Client._cache_path(Client._api_path(leaderboard, platform))
-
-        if not path.exists():
-            raise ValueError(f"Cached data for {leaderboard.value} does not exist")
-
-        async with aiofiles.open(path/"data.json", "rb") as fp:
-            _data = await fp.read()
-            data = json.loads(_data)
-
-        filtered = faithful_leaderboard_filter(
+        filtered = faithful_filter(
             data,
             name=name,
             club_tag=club_tag,
@@ -174,37 +145,41 @@ class Client():
 
     def get_leaderboard_sync(
         self,
-        leaderboard: Leaderboard,
+        leaderboard: Leaderboard | str,
+        platform: Platform | str = Platform.CROSSPLAY,
         name: str | None = None,
         club_tag: str | None = None,
         exact_club_tag: bool | None = None,
-        platform: Platform = Platform.CROSSPLAY
+        filters: Mapping[str, Any] | None = None
     ):
         """
-        Get a leaderboard synchronously.
+        Retrieve leaderboard data synchronously, optionally applying API-provided filters and module-provided filters.
 
         Args:
-            leaderboard (Leaderboard): Which leaderboard to get data from.
-            name (str | None, optional): Name filter, case-insensitive. Defaults to None.
-            club_tag (str | None, optional): Club tag filter. Defaults to None.
-            exact_club_tag (bool | None, optional): Whether or not to filter by the EXACT club tag, if club_tag is not None. Defaults to None.
-            platform (Platform, optional): Required for OB, S1, and S2. Defaults to Platform.CROSSPLAY.
+            leaderboard (Leaderboard | str): The leaderboard to fetch.
+            name (str | None, optional): Name filter, server-side, case-insensitive. Defaults to None.
+            club_tag (str | None, optional): Club tag filter, server-side, case-insensitive. Defaults to None.
+            exact_club_tag (bool | None, optional): Whether to filter by the exact club tag (case-insensitive), if club_tag is provided. Defaults to None.
+            platform (Platform, optional): *Required* for OB, S1, and S2 leaderboards. Defaults to Platform.CROSSPLAY.
+            filters (Mapping[str, Any] | None, optional): Optional module-level filters applied *after* data retrieval.
+                Supports double-underscore syntax (e.g., `score__gte=50000`, `name__icontains="lead"`).
         """
         leaderboard = Leaderboard(leaderboard)
         platform = Platform(platform)
 
         logger.info(f"Sync get for {leaderboard.value} issued.")
+
         if self.use_cached:
             logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
             try:
-                data = self._get_leaderboard_sync_cached(
+                data = self._get_leaderboard_cached(
                     leaderboard,
                     name,
                     club_tag,
                     exact_club_tag,
                     platform
                 )
-                logger.info("...Found!")
+                logger.info("Cache hit.")
             except ValueError:
                 data = self._get_leaderboard_sync(
                     leaderboard,
@@ -213,9 +188,9 @@ class Client():
                     exact_club_tag,
                     platform
                 )
-                logger.info("...Not found, falling back to live data from API.")
+                logger.info("Cache miss. Fetching live data from API.")
         else:
-            logger.info("Skipping cache.")
+            logger.info("Cache disabled. Fetching live data from API.")
             data = self._get_leaderboard_sync(
                 leaderboard,
                 name,
@@ -225,96 +200,51 @@ class Client():
             )
 
         try:
-            return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate(data)
+            return_type = LEADERBOARD_USER_MAP[leaderboard]
+            return_object = LeaderboardResult[return_type].model_validate(data)
+            if filters:
+                return_object = return_object.filter(**filters)
+            return return_object
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
-
-    def get_leaderboard_sync_ex(
-        self,
-        leaderboard: Leaderboard,
-        platform: Platform = Platform.CROSSPLAY,
-        /,
-        **filters
-    ):
-        leaderboard = Leaderboard(leaderboard)
-        platform = Platform(platform)
-
-        logger.info(f"Sync get for {leaderboard.value} issued.")
-        if self.use_cached:
-            logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
-            try:
-                data = self._get_leaderboard_sync_cached(
-                    leaderboard,
-                    None,
-                    None,
-                    None,
-                    platform
-                )
-                logger.info("...Found!")
-            except ValueError:
-                data = self._get_leaderboard_sync(
-                    leaderboard,
-                    None,
-                    None,
-                    None,
-                    platform
-                )
-                logger.info("...Not found, falling back to live data from API.")
-        else:
-            logger.info("Skipping cache.")
-            data = self._get_leaderboard_sync(
-                leaderboard,
-                None,
-                None,
-                None,
-                platform
-            )
-
-        validate_type = LEADERBOARD_USER_MAP[leaderboard]
-        validated = [validate_type.model_validate(i) for i in data["data"]]
-
-        filtered = extended_leaderboard_filter(validated, **filters)
-
-        return LeaderboardResultEX[validate_type](
-            leaderboard=leaderboard,
-            platform=platform,
-            filters=filters,
-            data=filtered
-        )
 
     async def get_leaderboard_async(
         self,
         leaderboard: Leaderboard,
+        platform: Platform = Platform.CROSSPLAY,
         name: str | None = None,
         club_tag: str | None = None,
         exact_club_tag: bool | None = None,
-        platform: Platform = Platform.CROSSPLAY
+        filters: Mapping[str, Any] | None = None
     ):
         """
-        Get a leaderboard asynchronously.
+        Retrieve leaderboard data asynchronously, optionally applying API-provided filters and module-provided filters.
 
         Args:
-            leaderboard (Leaderboard): Which leaderboard to get data from.
-            name (str | None, optional): Name filter, case-insensitive. Defaults to None.
-            club_tag (str | None, optional): Club tag filter. Defaults to None.
-            exact_club_tag (bool | None, optional): Whether or not to filter by the EXACT club tag, if club_tag is not None. Defaults to None.
-            platform (Platform, optional): Required for OB, S1, and S2. Defaults to Platform.CROSSPLAY.
+            leaderboard (Leaderboard | str): The leaderboard to fetch.
+            name (str | None, optional): Name filter, server-side, case-insensitive. Defaults to None.
+            club_tag (str | None, optional): Club tag filter, server-side, case-insensitive. Defaults to None.
+            exact_club_tag (bool | None, optional): Whether to filter by the exact club tag (case-insensitive), if club_tag is provided. Defaults to None.
+            platform (Platform, optional): *Required* for OB, S1, and S2 leaderboards. Defaults to Platform.CROSSPLAY.
+            filters (Mapping[str, Any] | None, optional): Optional module-level filters applied *after* data retrieval.
+                Supports double-underscore syntax (e.g., `score__gte=50000`, `name__icontains="lead"`).
         """
         leaderboard = Leaderboard(leaderboard)
         platform = Platform(platform)
 
         logger.info(f"Async get for {leaderboard.value} issued.")
+
         if self.use_cached:
             logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
             try:
-                data = await self._get_leaderboard_async_cached(
+                data = self._get_leaderboard_cached(
                     leaderboard,
                     name,
                     club_tag,
                     exact_club_tag,
                     platform
                 )
-                logger.info("...Found!")
+                logger.info("Cache hit.")
             except ValueError:
                 data = await self._get_leaderboard_async(
                     leaderboard,
@@ -323,9 +253,9 @@ class Client():
                     exact_club_tag,
                     platform
                 )
-                logger.info("...Not found, falling back to live data from API.")
+                logger.info("Cache miss. Fetching live data from API.")
         else:
-            logger.info("Skipping cache.")
+            logger.info("Cache disabled. Fetching live data from API.")
             data = await self._get_leaderboard_async(
                 leaderboard,
                 name,
@@ -335,59 +265,10 @@ class Client():
             )
 
         try:
-            return LeaderboardResult[LEADERBOARD_USER_MAP[leaderboard]].model_validate(data)
+            return_type = LEADERBOARD_USER_MAP[leaderboard]
+            return_object = LeaderboardResult[return_type].model_validate(data)
+            if filters:
+                return_object = return_object.filter(**filters)
+            return return_object
         except ValidationError as e:
             raise ValueError("Could not convert leaderboard data to object") from e
-
-    async def get_leaderboard_async_ex(
-        self,
-        leaderboard: Leaderboard,
-        platform: Platform = Platform.CROSSPLAY,
-        /,
-        **filters
-    ):
-        leaderboard = Leaderboard(leaderboard)
-        platform = Platform(platform)
-
-        logger.info(f"Async get for {leaderboard.value} issued.")
-        if self.use_cached:
-            logger.info(f"Trying to retrieve {leaderboard.value} data from cache...")
-            try:
-                data = await self._get_leaderboard_async_cached(
-                    leaderboard,
-                    None,
-                    None,
-                    None,
-                    platform
-                )
-                logger.info("...Found!")
-            except ValueError:
-                data = await self._get_leaderboard_async(
-                    leaderboard,
-                    None,
-                    None,
-                    None,
-                    platform
-                )
-                logger.info("...Not found, falling back to live data from API.")
-        else:
-            logger.info("Skipping cache.")
-            data = await self._get_leaderboard_async(
-                leaderboard,
-                None,
-                None,
-                None,
-                platform
-            )
-
-        validate_type = LEADERBOARD_USER_MAP[leaderboard]
-        validated = [validate_type.model_validate(i) for i in data["data"]]
-
-        filtered = extended_leaderboard_filter(validated, **filters)
-
-        return LeaderboardResultEX[validate_type](
-            leaderboard=leaderboard,
-            platform=platform,
-            filters=filters,
-            data=filtered
-        )

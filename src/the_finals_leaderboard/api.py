@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from enum import StrEnum
-from typing import Any, Generic, List, TypeVar
+from typing import Any, Dict, Generic, List, TypeVar
 from pydantic import BaseModel, Field, field_validator, model_validator
+from the_finals_leaderboard.filtering import *
 from the_finals_leaderboard.models import *
 
 T = TypeVar("T")
@@ -13,24 +15,14 @@ def _to_camel(string: str) -> str:
     return parts[0] + "".join(word.capitalize() for word in parts[1:])
 
 
-class LeaderboardResultEX(BaseModel, Generic[T]):
-    leaderboard: Leaderboard
-    platform: Platform
-    filters: dict[str, Any]
-    players: List[T] = Field(alias="data")
-
-    model_config = {
-        "alias_generator": _to_camel,
-        "populate_by_name": True,
-    }
-
-
 class LeaderboardResult(BaseModel, Generic[T]):
     leaderboard: Leaderboard
     platform: Platform | None = None
     name_filter: str | None = None
     club_tag_filter: str | None = None
     exact_club_tag: bool | None = None
+    filters: Dict[str, Any] | None = None
+
     players: List[T] = Field(alias="data")
 
     model_config = {
@@ -67,6 +59,12 @@ class LeaderboardResult(BaseModel, Generic[T]):
         if value is None:
             return None
         return value.upper()
+
+    def filter(self, **filters):
+        new = deepcopy(self)
+        new.players = extended_filter(new.players, **filters)
+        new.filters = filters
+        return new
 
 
 class Leaderboard(StrEnum):
