@@ -189,7 +189,7 @@ class Client():
         except ValidationError as e:
             raise ValueError("Unable to validate model. Was bad data returned?") from e
 
-    async def get_leaderboard_sync_async(
+    async def get_leaderboard_async(
         self,
         leaderboard: api.Leaderboard,
         platform: api.Platform | None = None,
