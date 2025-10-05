@@ -96,6 +96,7 @@ class Leaderboard(StrEnum):
     S8POWERSHIFT = "s8powershift"
     S8QUICKCASH = "s8quickcash"
     S8TEAMDEATHMATCH = "s8teamdeathmatch"
+    S8HEAVENORELSE = "s8heavenorelse"
 
 
 class Platform(StrEnum):
@@ -148,6 +149,7 @@ LEADERBOARD_USER_MAP: dict[Leaderboard, Type[models.BaseUser]] = {
     Leaderboard.S8POWERSHIFT: models.Season8PowerShiftUser,
     Leaderboard.S8QUICKCASH: models.Season8QuickCashUser,
     Leaderboard.S8TEAMDEATHMATCH: models.Season8TeamDeathmatchUser,
+    Leaderboard.S8HEAVENORELSE: models.Season8HeavenOrElseUser
 }
 
 LEADERBOARD_PLATFORM_MAP = {
@@ -193,6 +195,7 @@ LEADERBOARD_PLATFORM_MAP = {
     Leaderboard.S8POWERSHIFT: (Platform.CROSSPLAY,),
     Leaderboard.S8QUICKCASH: (Platform.CROSSPLAY,),
     Leaderboard.S8TEAMDEATHMATCH: (Platform.CROSSPLAY,),
+    Leaderboard.S8HEAVENORELSE: (Platform.CROSSPLAY,)
 }
 
 CURRENT_SEASON_LEADERBOARDS = (
@@ -203,4 +206,5 @@ CURRENT_SEASON_LEADERBOARDS = (
     Leaderboard.S8POWERSHIFT,
     Leaderboard.S8QUICKCASH,
     Leaderboard.S8TEAMDEATHMATCH,
+    Leaderboard.S8HEAVENORELSE,
 )

@@ -71,6 +71,7 @@ __all__ = [
     "Season8PowerShiftUser",
     "Season8QuickCashUser",
     "Season8TeamDeathmatchUser",
+    "Season8HeavenOrElseUser",
     #
     "Season1User",
     "Season2User",
@@ -89,7 +90,7 @@ Season4User: TypeAlias = Union["Season4RankedUser", "Season4SponsorUser", "Seaso
 Season5User: TypeAlias = Union["Season5RankedUser", "Season5SponsorUser", "Season5WorldTourUser", "Season5TerminalAttackUser", "Season5PowerShiftUser", "Season5QuickCashUser", "Season5BankItUser"]
 Season6User: TypeAlias = Union["Season6RankedUser", "Season6SponsorUser", "Season6WorldTourUser", "Season6TerminalAttackUser", "Season6PowerShiftUser", "Season6QuickCashUser", "Season6TeamDeathmatchUser", "Season6HeavyHittersUser"]
 Season7User: TypeAlias = Union["Season7RankedUser", "Season7SponsorUser", "Season7WorldTourUser", "Season7TerminalAttackUser", "Season7PowerShiftUser", "Season7QuickCashUser", "Season7TeamDeathmatchUser", "Season7BlastOffUser", "Season7CashBallUser"]
-Season8User: TypeAlias = Union["Season8RankedUser", "Season8SponsorUser", "Season8WorldTourUser", "Season8Head2HeadUser", "Season8PowerShiftUser", "Season8QuickCashUser", "Season8TeamDeathmatchUser"]
+Season8User: TypeAlias = Union["Season8RankedUser", "Season8SponsorUser", "Season8WorldTourUser", "Season8Head2HeadUser", "Season8PowerShiftUser", "Season8QuickCashUser", "Season8TeamDeathmatchUser", "Season8HeavenOrElseUser"]
 
 
 class RankedLeague(StrEnum):
@@ -485,3 +486,12 @@ class Season8QuickCashUser(QuickCashUser, TaggedUser):
 
 class Season8TeamDeathmatchUser(TeamDeathmatchUser, TaggedUser):
     pass
+
+
+class Season8HeavenOrElseUser(BaseUser, TaggedUser):
+    rank: int
+    points: int
+
+    @property
+    def score(self):
+        return self.points
