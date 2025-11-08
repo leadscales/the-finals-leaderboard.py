@@ -3,7 +3,9 @@ from __future__ import annotations
 from copy import deepcopy
 from enum import StrEnum
 from typing import Any, Generic, Type, TypeVar
+
 from pydantic import BaseModel, Field, model_validator
+
 from the_finals_leaderboard import filtering, models
 
 T = TypeVar("T")
@@ -97,6 +99,7 @@ class Leaderboard(StrEnum):
     S8QUICKCASH = "s8quickcash"
     S8TEAMDEATHMATCH = "s8teamdeathmatch"
     S8HEAVENORELSE = "s8heavenorelse"
+    S8GHOULRUSH = "s8ghoulrush"
 
 
 class Platform(StrEnum):
@@ -149,7 +152,8 @@ LEADERBOARD_USER_MAP: dict[Leaderboard, Type[models.BaseUser]] = {
     Leaderboard.S8POWERSHIFT: models.Season8PowerShiftUser,
     Leaderboard.S8QUICKCASH: models.Season8QuickCashUser,
     Leaderboard.S8TEAMDEATHMATCH: models.Season8TeamDeathmatchUser,
-    Leaderboard.S8HEAVENORELSE: models.Season8HeavenOrElseUser
+    Leaderboard.S8HEAVENORELSE: models.Season8HeavenOrElseUser,
+    Leaderboard.S8GHOULRUSH: models.Season8GhoulRushUser
 }
 
 LEADERBOARD_PLATFORM_MAP = {
@@ -195,7 +199,8 @@ LEADERBOARD_PLATFORM_MAP = {
     Leaderboard.S8POWERSHIFT: (Platform.CROSSPLAY,),
     Leaderboard.S8QUICKCASH: (Platform.CROSSPLAY,),
     Leaderboard.S8TEAMDEATHMATCH: (Platform.CROSSPLAY,),
-    Leaderboard.S8HEAVENORELSE: (Platform.CROSSPLAY,)
+    Leaderboard.S8HEAVENORELSE: (Platform.CROSSPLAY,),
+    Leaderboard.S8GHOULRUSH: (Platform.CROSSPLAY,)
 }
 
 CURRENT_SEASON_LEADERBOARDS = (
@@ -207,4 +212,5 @@ CURRENT_SEASON_LEADERBOARDS = (
     Leaderboard.S8QUICKCASH,
     Leaderboard.S8TEAMDEATHMATCH,
     Leaderboard.S8HEAVENORELSE,
+    Leaderboard.S8GHOULRUSH
 )

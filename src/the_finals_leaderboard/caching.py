@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import json
-import httpx
 import datetime
 import gzip
-
+import json
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path, PurePath
 from typing import Any
-from the_finals_leaderboard import api
 
+import httpx
+
+from the_finals_leaderboard import api
 
 _SCRIPT_DIR = Path(__file__).parent
 _STATIC_PATH = _SCRIPT_DIR / "static"

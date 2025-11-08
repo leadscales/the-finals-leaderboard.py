@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from the_finals_leaderboard import models, api
+
+from the_finals_leaderboard import api, models
 
 SCRIPT_DIR = Path(__file__).parent
 
@@ -11,9 +12,10 @@ def generate_client():
         "from __future__ import annotations",
         "",
         "import datetime",
-        "from the_finals_leaderboard import models, api",
-        "from typing import Literal, overload, Mapping, Any",
         "from enum import StrEnum",
+        "from typing import Any, Literal, overload",
+        "",
+        "from the_finals_leaderboard import api, models",
         "",
         "",
         "class StaticCachingPolicy(StrEnum):",

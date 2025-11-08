@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import datetime
 import logging
-import httpx
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Literal, Mapping
-from pydantic import ValidationError
-from the_finals_leaderboard import api, caching
 
+import httpx
+from pydantic import ValidationError
+
+from the_finals_leaderboard import api, caching
 
 _MAX_DT = datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
 

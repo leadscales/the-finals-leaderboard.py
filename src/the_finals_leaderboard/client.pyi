@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import datetime
-from the_finals_leaderboard import models, api
-from typing import Literal, overload, Mapping, Any
 from enum import StrEnum
+from typing import Any, Literal, overload
+
+from the_finals_leaderboard import api, models
 
 
 class StaticCachingPolicy(StrEnum):
@@ -238,3 +239,8 @@ class Client():
     def get_leaderboard_sync(self, leaderboard: Literal[api.Leaderboard.S8HEAVENORELSE, "s8heavenorelse"], platform: api.Platform | Literal["crossplay", "steam", "xbox", "psn"] | None = None, ignore_cache: bool = False, /, **filters: Any) -> api.LeaderboardResult[models.Season8HeavenOrElseUser]: ...
     @overload
     async def get_leaderboard_async(self, leaderboard: Literal[api.Leaderboard.S8HEAVENORELSE, "s8heavenorelse"], platform: api.Platform | Literal["crossplay", "steam", "xbox", "psn"] | None = None, ignore_cache: bool = False, /, **filters: Any) -> api.LeaderboardResult[models.Season8HeavenOrElseUser]: ...
+
+    @overload
+    def get_leaderboard_sync(self, leaderboard: Literal[api.Leaderboard.S8GHOULRUSH, "s8ghoulrush"], platform: api.Platform | Literal["crossplay", "steam", "xbox", "psn"] | None = None, ignore_cache: bool = False, /, **filters: Any) -> api.LeaderboardResult[models.Season8GhoulRushUser]: ...
+    @overload
+    async def get_leaderboard_async(self, leaderboard: Literal[api.Leaderboard.S8GHOULRUSH, "s8ghoulrush"], platform: api.Platform | Literal["crossplay", "steam", "xbox", "psn"] | None = None, ignore_cache: bool = False, /, **filters: Any) -> api.LeaderboardResult[models.Season8GhoulRushUser]: ...
