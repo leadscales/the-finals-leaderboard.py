@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import datetime
 import gzip
 import json
-from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path, PurePath
 from typing import Any
@@ -14,7 +12,7 @@ from the_finals_leaderboard import api
 
 _SCRIPT_DIR = Path(__file__).parent
 _STATIC_PATH = _SCRIPT_DIR / "static"
-_CURRENT_SEASON = "s8"
+_CURRENT_SEASON = "s9"
 
 
 def fetch_static():
@@ -72,3 +70,8 @@ def list_static_fname():
         for f in resources.files("the_finals_leaderboard.static").iterdir()
         if f.name.endswith(".json.gz")
     ]
+
+
+if __name__ == "__main__":
+    a = fetch_static()
+    b = save_static(a)

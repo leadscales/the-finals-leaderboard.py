@@ -82,7 +82,8 @@ __all__ = [
     "Season5User",
     "Season6User",
     "Season7User",
-    "Season8User"
+    "Season8User",
+    "Season9User",
 ]  # pyright: ignore[reportUnsupportedDunderAll]
 
 Season1User: TypeAlias = "Season1RankedUser"
@@ -93,6 +94,7 @@ Season5User: TypeAlias = Union["Season5RankedUser", "Season5SponsorUser", "Seaso
 Season6User: TypeAlias = Union["Season6RankedUser", "Season6SponsorUser", "Season6WorldTourUser", "Season6TerminalAttackUser", "Season6PowerShiftUser", "Season6QuickCashUser", "Season6TeamDeathmatchUser", "Season6HeavyHittersUser"]
 Season7User: TypeAlias = Union["Season7RankedUser", "Season7SponsorUser", "Season7WorldTourUser", "Season7TerminalAttackUser", "Season7PowerShiftUser", "Season7QuickCashUser", "Season7TeamDeathmatchUser", "Season7BlastOffUser", "Season7CashBallUser"]
 Season8User: TypeAlias = Union["Season8RankedUser", "Season8SponsorUser", "Season8WorldTourUser", "Season8Head2HeadUser", "Season8PowerShiftUser", "Season8QuickCashUser", "Season8TeamDeathmatchUser", "Season8HeavenOrElseUser", "Season8GhoulRushUser"]
+Season9User: TypeAlias = Union["Season9RankedUser", "Season9SponsorUser", "Season9WorldTourUser", "Season9Head2HeadUser", "Season9PowerShiftUser", "Season9QuickCashUser", "Season9TeamDeathmatchUser", "Season9PointBreakUser"]
 
 
 class RankedLeague(StrEnum):
@@ -243,6 +245,10 @@ class TeamDeathmatchUser(QuickPlayUser):
 
 
 class Head2HeadUser(QuickPlayUser):
+    pass
+
+
+class PointBreakUser(QuickPlayUser):
     pass
 
 # Leaderboard return types
@@ -506,3 +512,41 @@ class Season8GhoulRushUser(BaseUser, TaggedUser):
     @property
     def score(self):
         return self.points
+
+
+class Season9RankedUser(RankedUser, TaggedUser):
+    change: int
+    league_number: LeagueNumber
+    rank_score: int
+
+    @property
+    def score(self):
+        return self.rank_score
+
+
+class Season9SponsorUser(SponsorUser, TaggedUser):
+    pass
+
+
+class Season9WorldTourUser(WorldTourUser, TaggedUser):
+    pass
+
+
+class Season9Head2HeadUser(Head2HeadUser, TaggedUser):
+    pass
+
+
+class Season9PowerShiftUser(PowerShiftUser, TaggedUser):
+    pass
+
+
+class Season9QuickCashUser(QuickCashUser, TaggedUser):
+    pass
+
+
+class Season9TeamDeathmatchUser(TeamDeathmatchUser, TaggedUser):
+    pass
+
+
+class Season9PointBreakUser(PointBreakUser, TaggedUser):
+    pass

@@ -100,6 +100,14 @@ class Leaderboard(StrEnum):
     S8TEAMDEATHMATCH = "s8teamdeathmatch"
     S8HEAVENORELSE = "s8heavenorelse"
     S8GHOULRUSH = "s8ghoulrush"
+    S9 = "s9"
+    S9SPONSOR = "s9sponsor"
+    S9WORLDTOUR = "s9worldtour"
+    S9HEAD2HEAD = "s9head2head"
+    S9POWERSHIFT = "s9powershift"
+    S9QUICKCASH = "s9quickcash"
+    S9TEAMDEATHMATCH = "s9teamdeathmatch"
+    S9POINTBREAK = "s9pointbreak"
 
 
 class Platform(StrEnum):
@@ -153,7 +161,15 @@ LEADERBOARD_USER_MAP: dict[Leaderboard, Type[models.BaseUser]] = {
     Leaderboard.S8QUICKCASH: models.Season8QuickCashUser,
     Leaderboard.S8TEAMDEATHMATCH: models.Season8TeamDeathmatchUser,
     Leaderboard.S8HEAVENORELSE: models.Season8HeavenOrElseUser,
-    Leaderboard.S8GHOULRUSH: models.Season8GhoulRushUser
+    Leaderboard.S8GHOULRUSH: models.Season8GhoulRushUser,
+    Leaderboard.S9: models.Season9RankedUser,
+    Leaderboard.S9SPONSOR: models.Season9SponsorUser,
+    Leaderboard.S9WORLDTOUR: models.Season9WorldTourUser,
+    Leaderboard.S9HEAD2HEAD: models.Season9Head2HeadUser,
+    Leaderboard.S9POWERSHIFT: models.Season9PowerShiftUser,
+    Leaderboard.S9QUICKCASH: models.Season9QuickCashUser,
+    Leaderboard.S9TEAMDEATHMATCH: models.Season9TeamDeathmatchUser,
+    Leaderboard.S9POINTBREAK: models.Season9PointBreakUser,
 }
 
 LEADERBOARD_PLATFORM_MAP = {
@@ -200,17 +216,24 @@ LEADERBOARD_PLATFORM_MAP = {
     Leaderboard.S8QUICKCASH: (Platform.CROSSPLAY,),
     Leaderboard.S8TEAMDEATHMATCH: (Platform.CROSSPLAY,),
     Leaderboard.S8HEAVENORELSE: (Platform.CROSSPLAY,),
-    Leaderboard.S8GHOULRUSH: (Platform.CROSSPLAY,)
+    Leaderboard.S8GHOULRUSH: (Platform.CROSSPLAY,),
+    Leaderboard.S9: (Platform.CROSSPLAY,),
+    Leaderboard.S9SPONSOR: (Platform.CROSSPLAY,),
+    Leaderboard.S9WORLDTOUR: (Platform.CROSSPLAY,),
+    Leaderboard.S9HEAD2HEAD: (Platform.CROSSPLAY,),
+    Leaderboard.S9POWERSHIFT: (Platform.CROSSPLAY,),
+    Leaderboard.S9QUICKCASH: (Platform.CROSSPLAY,),
+    Leaderboard.S9TEAMDEATHMATCH: (Platform.CROSSPLAY,),
+    Leaderboard.S9POINTBREAK: (Platform.CROSSPLAY,)
 }
 
 CURRENT_SEASON_LEADERBOARDS = (
-    Leaderboard.S8,
-    Leaderboard.S8SPONSOR,
-    Leaderboard.S8WORLDTOUR,
-    Leaderboard.S8HEAD2HEAD,
-    Leaderboard.S8POWERSHIFT,
-    Leaderboard.S8QUICKCASH,
-    Leaderboard.S8TEAMDEATHMATCH,
-    Leaderboard.S8HEAVENORELSE,
-    Leaderboard.S8GHOULRUSH
+    Leaderboard.S9,
+    Leaderboard.S9SPONSOR,
+    Leaderboard.S9WORLDTOUR,
+    Leaderboard.S9HEAD2HEAD,
+    Leaderboard.S9POWERSHIFT,
+    Leaderboard.S9QUICKCASH,
+    Leaderboard.S9TEAMDEATHMATCH,
+    Leaderboard.S9POINTBREAK,
 )
